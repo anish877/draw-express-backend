@@ -2,8 +2,8 @@ import express, { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
-import { prismaClient } from "./db/index";
-import { JWT_SECRET } from "./config/index";
+import { prismaClient } from "./db";
+import { JWT_SECRET } from "./config";
 import { authenticate } from "./middleware/authenticate";
 import cors from "cors"
 import axios from "axios";
