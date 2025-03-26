@@ -16,6 +16,22 @@ app.use(cors({
   credentials: true
 }));
 
+const url = `https://draw-ws-backend.onrender.com`;
+const interval = 30000;
+
+function reloadWebsite() {
+  axios
+    .get(url)
+    .then((response) => {
+      console.log("website reloded");
+    })
+    .catch((error) => {
+      console.error(`Error : ${error.message}`);
+    });
+}
+
+setInterval(reloadWebsite, interval);
+
 app.post("/signup", async (req: Request, res: Response) => {
     const { email, password, name } = req.body;
 
