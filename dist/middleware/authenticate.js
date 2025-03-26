@@ -14,8 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticate = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const index_1 = require("../db/index");
-const index_2 = require("../config/index");
+const db_1 = require("../db");
+const config_1 = require("../config");
 const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -25,12 +25,12 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             res.status(400).json({ message: "Cookie not found" });
             return;
         }
-        const decoded = jsonwebtoken_1.default.verify(cookie, index_2.JWT_SECRET);
+        const decoded = jsonwebtoken_1.default.verify(cookie, config_1.JWT_SECRET);
         if (!decoded || !decoded.email) {
             res.status(400).json({ message: "Invalid token" });
             return;
         }
-        const user = yield index_1.prismaClient.user.findUnique({ where: { email: decoded.email } });
+        const user = yield db_1.prismaClient.user.findUnique({ where: { email: decoded.email } });
         if (!user) {
             res.status(400).json({ message: "User not found" });
             return;

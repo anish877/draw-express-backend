@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const index_1 = require("./db/index");
-const index_2 = require("./config/index");
+const db_1 = require("./db");
+const config_1 = require("./config");
 const authenticate_1 = require("./middleware/authenticate");
 const cors_1 = __importDefault(require("cors"));
 const axios_1 = __importDefault(require("axios"));
@@ -35,13 +35,13 @@ app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return;
     }
     try {
-        const existingUser = yield index_1.prismaClient.user.findUnique({ where: { email } });
+        const existingUser = yield db_1.prismaClient.user.findUnique({ where: { email } });
         if (existingUser) {
             res.status(400).json({ message: "Email already registered" });
             return;
         }
-        const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-        yield index_1.prismaClient.user.create({
+        const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
+        yield db_1.prismaClient.user.create({
             data: { email, password: hashedPassword, name }
         });
         res.status(201).json({ name, email });
@@ -60,17 +60,17 @@ app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return;
     }
     try {
-        const user = yield index_1.prismaClient.user.findUnique({ where: { email } });
+        const user = yield db_1.prismaClient.user.findUnique({ where: { email } });
         if (!user) {
             res.status(400).json({ message: "User not found" });
             return;
         }
-        const isPasswordCorrect = yield bcrypt_1.default.compare(password, user.password);
+        const isPasswordCorrect = yield bcryptjs_1.default.compare(password, user.password);
         if (!isPasswordCorrect) {
             res.status(400).json({ message: "Wrong password" });
             return;
         }
-        const token = jsonwebtoken_1.default.sign({ id: user.id, email, name: user.name }, index_2.JWT_SECRET, { expiresIn: "1d" });
+        const token = jsonwebtoken_1.default.sign({ id: user.id, email, name: user.name }, config_1.JWT_SECRET, { expiresIn: "1d" });
         res.cookie("uuid", token, { httpOnly: true, secure: true, sameSite: "none" });
         res.status(200).json({ email, name: user.name, token, userId: user.id });
         return;
@@ -89,12 +89,12 @@ app.post("/create-room", authenticate_1.authenticate, (req, res) => __awaiter(vo
     }
     const slug = name.toLowerCase().replace(/\s+/g, "-");
     try {
-        const existingRoom = yield index_1.prismaClient.room.findUnique({ where: { slug } });
+        const existingRoom = yield db_1.prismaClient.room.findUnique({ where: { slug } });
         if (existingRoom) {
             res.status(400).json({ message: "Room already exists" });
             return;
         }
-        yield index_1.prismaClient.room.create({
+        yield db_1.prismaClient.room.create({
             //@ts-ignore
             data: { slug, adminId: req.user.id }
         });
@@ -113,7 +113,7 @@ app.get("/chats/:roomdId", (req, res) => __awaiter(void 0, void 0, void 0, funct
         return;
     }
     const roomId = parseInt(req.params.roomdId);
-    const messages = yield index_1.prismaClient.chat.findMany({
+    const messages = yield db_1.prismaClient.chat.findMany({
         where: {
             roomId: roomId
         },
@@ -130,7 +130,7 @@ app.get("/chats/text_chats/:roomdId", (req, res) => __awaiter(void 0, void 0, vo
         return;
     }
     const roomId = parseInt(req.params.roomdId);
-    const messages = yield index_1.prismaClient.text_Chat.findMany({
+    const messages = yield db_1.prismaClient.text_Chat.findMany({
         where: {
             roomId: roomId,
         },
@@ -151,7 +151,7 @@ app.get("/room/:slug", (req, res) => __awaiter(void 0, void 0, void 0, function*
         return;
     }
     const slug = req.params.slug;
-    const room = yield index_1.prismaClient.room.findUnique({
+    const room = yield db_1.prismaClient.room.findUnique({
         where: {
             slug: slug
         }
@@ -160,7 +160,7 @@ app.get("/room/:slug", (req, res) => __awaiter(void 0, void 0, void 0, function*
 }));
 app.get("/rooms", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const rooms = yield index_1.prismaClient.room.findMany({
+        const rooms = yield db_1.prismaClient.room.findMany({
             orderBy: {
                 id: "desc"
             },
