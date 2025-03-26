@@ -32,6 +32,22 @@ function reloadWebsite() {
 
 setInterval(reloadWebsite, interval);
 
+const url2 = `https://draw-express-backend.onrender.com`;
+const interval2 = 30000;
+
+function reloadWebsite2() {
+  axios
+    .get(url2)
+    .then((response) => {
+      console.log("website reloded");
+    })
+    .catch((error) => {
+      console.error(`Error : ${error.message}`);
+    });
+}
+
+setInterval(reloadWebsite2, interval2);
+
 app.post("/signup", async (req: Request, res: Response) => {
     const { email, password, name } = req.body;
 
