@@ -25,9 +25,35 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
-    origin: "*",
+    origin: "https://draw-next-frontend.vercel.app",
     credentials: true
 }));
+const url = `https://draw-ws-backend.onrender.com`;
+const interval = 30000;
+function reloadWebsite() {
+    axios_1.default
+        .get(url)
+        .then((response) => {
+        console.log("website reloded");
+    })
+        .catch((error) => {
+        console.error(`Error : ${error.message}`);
+    });
+}
+setInterval(reloadWebsite, interval);
+const url2 = `https://draw-express-backend.onrender.com`;
+const interval2 = 30000;
+function reloadWebsite2() {
+    axios_1.default
+        .get(url2)
+        .then((response) => {
+        console.log("website reloded");
+    })
+        .catch((error) => {
+        console.error(`Error : ${error.message}`);
+    });
+}
+setInterval(reloadWebsite2, interval2);
 app.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password, name } = req.body;
     if (!email || !name || !password) {
